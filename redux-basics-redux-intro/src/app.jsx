@@ -1,31 +1,58 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+import Store from './store';    //  импортируем хранилище store
+
+const initialState = { count: 0 };    // переменная состояния
+
+function updateState(state, action) {    // функция, которая обновляет состояние. принимает состояние и действие
+  switch(action.type) {
+    case 'INCREMENT': return { count: state.count + action.amount };
+    case 'DECREMENT': return { count: state.count - action.amount };
+    case 'RESET': return { count: 0 };
+    default: return state;
+  }
+}
+
+const incrementAction = { type: 'INCREMENT', amount: 1 };
+const decrementAction = { type: 'DECREMENT', amount: 1 };
+const resetAction = { type: 'RESET' };
+
+const store = new Store(updateState, initialState);  //  создаем хранилище. передаем функцию для изменения state и начальное состояние
+
 class Counter extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = {count: 0};
-
     this.increment = this.increment.bind(this);
     this.decrement = this.decrement.bind(this);
+    this.reset = this.reset.bind(this);
+  }
+
+  componentDidMount() {
+    store.subscribe(() => this.forceUpdate());
   }
 
   increment() {
-    this.setState({count: this.state.count + 1});
+    store.update(incrementAction);
   }
 
   decrement() {
-    this.setState({count: this.state.count - 1});
+    store.update(decrementAction);
+  }
+
+  reset() {
+    store.update(resetAction);
   }
 
   render() {
     return (
       <div className="counter">
-        <span className="count">{this.state.count}</span>
+        <span className="count">{store.state.count}</span>
 
         <div className="buttons">
           <button className="decrement" onClick={this.decrement}>-</button>
+          <button className="reset" onClick={this.reset}>R</button>
           <button className="increment" onClick={this.increment}>+</button>
         </div>
       </div>
