@@ -1,67 +1,62 @@
-import { ADD_TODO, DELETE_TODO, EDIT_TODO, TOGGLE_TODO } from '../actions';
+import {GET_TODOS, ADD_TODO, DELETE_TODO, EDIT_TODO, TOGGLE_TODO} from '../actions';
 
 function todoReducer(state = {}, action) {
-    switch (action.type) {
-        case ADD_TODO:
-            return {
-                id: action.id,
-                title: action.title,
-                completed: false
-            };
+  switch (action.type) {
+    case GET_TODOS:
+      return action.todos;
 
-        case TOGGLE_TODO:
-            if (state.id !== action.id) {
-                return state;
-            }
+    case TOGGLE_TODO:
+      if (state.id !== action.todo.id) {
+        return state;
+      }
 
-            return Object.assign({}, state, {
-                completed: !state.completed
-            });
+      return action.todo;
 
-        case EDIT_TODO:
-            if (state.id !== action.id) {
-                return state;
-            }
+    case EDIT_TODO:
+      if (state.id !== action.todo.id) {
+        return state;
+      }
 
-            return Object.assign({}, state, {
-                title: action.title
-            });
-    }
+      return action.todo;
+  }
 }
 
 export default function reducer(state = [], action) {
-    switch (action.type) {
-        case ADD_TODO:
-            return [...state, todoReducer(undefined, action)];
+  switch (action.type) {
+    case GET_TODOS:
+      return action.todos;
 
-        case DELETE_TODO:
-            const index = state.findIndex(todo => todo.id === action.id);
+    case ADD_TODO:
+      return [...state, action.todo];
 
-            return [
-                ...state.slice(0, index),
-                ...state.slice(index + 1)
-            ];
+    case DELETE_TODO:
+      const index = state.findIndex(todo => todo.id === action.id);
 
-        case TOGGLE_TODO:
-            return state.map(todo => todoReducer(todo, action));
+      return [
+        ...state.slice(0, index),
+        ...state.slice(index + 1)
+      ];
 
-        case EDIT_TODO:
-            return state.map(todo => todoReducer(todo, action));
+    case TOGGLE_TODO:
+      return state.map(todo => todoReducer(todo, action));
 
-        default:
-            return state;
-    }
+    case EDIT_TODO:
+      return state.map(todo => todoReducer(todo, action));
+
+    default:
+      return state;
+  }
 }
 
 export function getFilteredTodos(state, filter) {
-    switch (filter) {
-        case 'ALL':
-            return state;
-        
-        case 'COMPLETED':
-            return state.filter(todo => todo.completed);
+  switch (filter) {
+    case 'ALL':
+      return state;
 
-        case 'UNCOMPLETED':
-            return state.filter(todo => !todo.completed);
-    }
+    case 'COMPLETED':
+      return state.filter(todo => todo.completed);
+
+    case 'UNCOMPLETED':
+      return state.filter(todo => !todo.completed);
+  }
 }
